@@ -99,8 +99,11 @@ right after the Tailscale step:
   run: sudo networksetup -setdnsservers Ethernet Empty
 ```
 
-Tailscale names (MagicDNS) then don't resolve on that runner. `Ethernet` is the network service's
-name on `macos-15`; on another image, `networksetup -listallnetworkservices` lists them.
+`networksetup` is macOS's own tool for network settings. `-setdnsservers Ethernet Empty` clears
+the DNS servers set by hand for the network service `Ethernet` (the runner's wired connection on
+`macos-15`; `networksetup -listallnetworkservices` lists them on another image), so macOS goes
+back to the ones its network gave it. The runner allows `sudo` without a password. After this,
+public names such as github.com resolve again, and Tailscale names (MagicDNS) don't.
 
 ## What was tried
 
