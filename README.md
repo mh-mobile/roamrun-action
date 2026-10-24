@@ -1,0 +1,111 @@
+# RoamRun install and launch
+
+A GitHub Action that installs an `.ipa` on your iPhone or iPad and launches it, from a job, over
+Tailscale, with [roamrunctl](https://github.com/mh-mobile/RoamRun/tree/main/Rust/roamrunctl). The
+device stays where it is (at home, at the office); the job reaches it through your tailnet.
+
+It does one of two things, as [RoamRun's CI guide](https://github.com/mh-mobile/RoamRun/blob/main/docs/ci.md)
+describes them:
+
+- **`key`**: roamrunctl runs on the runner, with the device's pairing from a secret. Nothing of yours
+  runs while the job does.
+- **`relay`**: a machine of yours beside the device runs `roamrunctl mcp --http` and keeps the
+  device's key; the job sends it the `.ipa` and the relay installs and launches.
+
+The job joins the tailnet first, with [tailscale/github-action](https://github.com/tailscale/github-action).
+The guide covers the setup: the Tailscale tag and OAuth client, the pairing for CI, and the relay.
+
+## Usage
+
+With the key on the runner:
+
+```yaml
+- uses: tailscale/github-action@v4
+  with:
+    oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+    oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+    tags: tag:ci
+- uses: mh-mobile/roamrun-action@v1
+  with:
+    key: ${{ secrets.ROAMRUN_CI_KEY }}
+    ipa: build/MyApp.ipa
+```
+
+Through a relay:
+
+```yaml
+- uses: tailscale/github-action@v4
+  with:
+    oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+    oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+    tags: tag:ci
+- uses: mh-mobile/roamrun-action@v1
+  with:
+    relay: 100.x.y.z:9090
+    token: ${{ secrets.RELAY_TOKEN }}
+    device: phone
+    ipa: build/MyApp.ipa
+```
+
+The `.ipa` has to be signed for the device (a development or ad hoc profile that lists it).
+One device takes one install at a time: give jobs that install on it a
+[concurrency](https://docs.github.com/actions/using-jobs/using-concurrency) group, as the guide shows.
+
+## Inputs
+
+| Input | |
+|---|---|
+| `key` | The device's pairing, a secret: a file `roamrun key create` wrote, or one `roamrunctl pair control` saved. Give this or `relay`. |
+| `relay` | The relay's address and port, as `roamrunctl mcp --http` printed them. Give this or `key`. |
+| `token` | With `relay`, the relay's token, a secret. |
+| `device` | With `relay`, the device as the relay names it (required). With `key`, the name it is saved under on the runner (default `device`). |
+| `ipa` | The `.ipa` to install. Without it, only `bundle-id` is launched. |
+| `bundle-id` | The app to launch. Without it, the app the `.ipa` holds is launched. |
+| `launch` | `false` to install only. Default `true`. |
+| `timeout` | With `relay`, the most seconds to wait for the install. By default, what the relay gives the upload and the install, and a minute more. |
+| `roamrunctl-version` | The roamrunctl release to use. Default `0.9.0`. With `relay`, the relay runs 0.9.0 or later too. |
+
+## What it does
+
+1. Checks the inputs, and stops with a message before anything is downloaded or sent.
+2. Downloads roamrunctl for the runner (Linux or macOS, x86_64 or arm64) from RoamRun's release,
+   checks it against the release's `roamrunctl-SHA256SUMS`, and unpacks it into a folder of its own
+   under the runner's temporary folder.
+3. With `key`: `roamrunctl key import -` reads the key from standard input into that folder. Then
+   `roamrunctl install … --launch` (or `install`, or `launch`).
+   With `relay`: `roamrunctl install … --relay <relay> --launch`. roamrunctl uploads the `.ipa`,
+   checks the sha256 the relay answers, waits for the install by the id the relay gives it, and
+   launches.
+4. Removes that folder, the key's file with it, whether the step passed or not.
+
+Windows runners aren't supported. roamrunctl's messages show in the job's log; the key and the
+token don't.
+
+## On macOS runners
+
+On macOS, tailscale/github-action points the system's DNS at `100.100.100.100` when the tailnet
+has MagicDNS on. On the tailnet this was tried with, github.com then stopped resolving, so nothing
+could be downloaded from GitHub (that tailnet's DNS settings weren't looked into). This action reaches
+the device and the relay by their addresses, not by name, so the runner's own DNS can be put back
+right after the Tailscale step:
+
+```yaml
+- uses: tailscale/github-action@v4
+  with:
+    oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+    oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+    tags: tag:ci
+- if: runner.os == 'macOS'
+  run: sudo networksetup -setdnsservers Ethernet Empty
+```
+
+Tailscale names (MagicDNS) then don't resolve on that runner. `Ethernet` is the network service's
+name on `macos-15`; on another image, `networksetup -listallnetworkservices` lists them.
+
+## What was tried
+
+Written once it has run from a release of this action.
+
+## License
+
+MIT

@@ -1,0 +1,59 @@
+name: RoamRun install and launch
+description: Install an .ipa on a paired iPhone or iPad over Tailscale and launch it, with roamrunctl
+author: mh-mobile
+branding:
+  icon: smartphone
+  color: blue
+
+inputs:
+  key:
+    description: >-
+      The device's pairing (a secret): a file `roamrun key create` wrote, or one `roamrunctl pair control`
+      saved. roamrunctl runs on this runner. Give this or `relay`.
+    required: false
+  relay:
+    description: >-
+      The relay's address and port, as `roamrunctl mcp --http` printed them (100.x.y.z:9090): the relay
+      installs and launches. Give this or `key`.
+    required: false
+  token:
+    description: With `relay`, the relay's token (a secret).
+    required: false
+  device:
+    description: >-
+      With `relay`, the device as the relay names it (required). With `key`, the name it is saved under
+      on this runner (default `device`).
+    required: false
+  ipa:
+    description: The .ipa to install. Without it, only `bundle-id` is launched.
+    required: false
+  bundle-id:
+    description: The app to launch. Without it, the app the .ipa holds is launched (unless `launch` is false).
+    required: false
+  launch:
+    description: Launch after installing.
+    required: false
+    default: "true"
+  timeout:
+    description: With `relay`, the most seconds to wait for the install (default, what the relay gives it).
+    required: false
+  roamrunctl-version:
+    description: The roamrunctl release to use.
+    required: false
+    default: "0.9.0"
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        RR_KEY: ${{ inputs.key }}
+        RR_RELAY: ${{ inputs.relay }}
+        ROAMRUNCTL_TOKEN: ${{ inputs.token }}
+        RR_DEVICE: ${{ inputs.device }}
+        RR_IPA: ${{ inputs.ipa }}
+        RR_BUNDLE: ${{ inputs.bundle-id }}
+        RR_LAUNCH: ${{ inputs.launch }}
+        RR_TIMEOUT: ${{ inputs.timeout }}
+        RR_VERSION: ${{ inputs.roamrunctl-version }}
+      run: '"$GITHUB_ACTION_PATH/scripts/run.sh"'

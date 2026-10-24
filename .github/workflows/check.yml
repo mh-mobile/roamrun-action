@@ -1,0 +1,31 @@
+name: check
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: shellcheck and actionlint
+        if: runner.os == 'Linux'
+        run: |
+          shellcheck scripts/*.sh
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.8/scripts/download-actionlint.bash) 1.7.8
+          ./actionlint -color
+      - name: Refused before anything is fetched
+        run: scripts/check-refusals.sh
+      - name: Through the action, a refusal fails the step
+        id: refused
+        continue-on-error: true
+        uses: ./
+        with:
+          bundle-id: com.example.app
+      - name: It did
+        if: steps.refused.outcome != 'failure'
+        run: exit 1
