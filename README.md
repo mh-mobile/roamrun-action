@@ -104,7 +104,20 @@ name on `macos-15`; on another image, `networksetup -listallnetworkservices` lis
 
 ## What was tried
 
-Written once it has run from a release of this action.
+On 2026-10-24 (UTC), from a private repository, with this action at the commit tagged v1.0.0 and
+roamrunctl 0.9.0, on an iPhone 15 Pro (iOS 27.0) at home, unlocked, the runner joined with
+tailscale/github-action@v4 and the tag `tag:ci`; a 1 MB development-signed `.ipa`:
+
+| Runner | Way | Result |
+|---|---|---|
+| `ubuntu-24.04` | `key` (a file `roamrun key create` wrote), `ipa` | installed and launched |
+| `ubuntu-24.04` | `key` (a file `roamrunctl pair control` saved on Linux), `bundle-id` | launched |
+| `macos-15` (arm64), with the DNS line above | the same two | the same |
+| `ubuntu-24.04` | `relay` (a MacBook Pro beside the device, roamrunctl 0.9.0) | installed (5 s) and launched |
+
+`launch: false`, and the three ways of `ipa` / `bundle-id`, ran from a Mac with the action's script
+against the same device. Not tried: `ubuntu-24.04-arm` and `macos-15-intel` runners, `timeout`,
+self-hosted runners, an iPad, a larger `.ipa`.
 
 ## License
 
