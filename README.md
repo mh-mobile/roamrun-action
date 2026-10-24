@@ -104,7 +104,7 @@ name on `macos-15`; on another image, `networksetup -listallnetworkservices` lis
 
 ## What was tried
 
-On 2026-10-24 (UTC), from a private repository, with this action at the commit tagged v1.0.0 and
+On 2026-10-24 (UTC), from a private repository, with this action at d74fce6 (v1.0.0 adds only this section) and
 roamrunctl 0.9.0, on an iPhone 15 Pro (iOS 27.0) at home, unlocked, the runner joined with
 tailscale/github-action@v4 and the tag `tag:ci`; a 1 MB development-signed `.ipa`:
 
