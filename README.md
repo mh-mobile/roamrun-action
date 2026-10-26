@@ -63,7 +63,7 @@ One device takes one install at a time: give jobs that install on it a
 | `bundle-id` | The app to launch. Without it, the app the `.ipa` holds is launched. |
 | `launch` | `false` to install only. Default `true`. |
 | `timeout` | With `relay`, the most seconds to wait for the install. By default, what the relay gives the upload and the install, and a minute more. |
-| `roamrunctl-version` | The roamrunctl release to use. Default `0.11.0`. With `relay`, the relay runs 0.9.0 or later too. |
+| `roamrunctl-version` | The roamrunctl release to use. Default `0.11.0`. With `relay`, the relay runs 0.10.0 or later. |
 
 ## What it does
 
@@ -117,6 +117,17 @@ tailscale/github-action@v4 and the tag `tag:ci`; a 1 MB development-signed `.ipa
 | `ubuntu-24.04` | `key` (a file `roamrunctl pair control` saved on Linux), `bundle-id` | launched |
 | `macos-15` (arm64), with the DNS line above | the same two | the same |
 | `ubuntu-24.04` | `relay` (a MacBook Pro beside the device, roamrunctl 0.9.0) | installed (5 s) and launched |
+
+On 2026-10-26 (UTC), with this action at 07dd4d1 (its default roamrunctl 0.11.0; v1.1.0 adds only
+this paragraph and the relay's minimum above), on an iPhone Duo, the runner joined with a signed
+auth key on a tailnet with Tailnet Lock:
+
+| Runner | Way | Result |
+|---|---|---|
+| `ubuntu-24.04` | `relay` (a MacBook Pro, roamrunctl 0.11.0) | installed (6 s) and launched |
+| `ubuntu-24.04` | `relay` (the same MacBook Pro, roamrunctl 0.10.0) | installed (5 s) and launched |
+
+`key` wasn't run with 0.11.0, nor a relay of 0.9.0 with it.
 
 `launch: false`, and the three ways of `ipa` / `bundle-id`, ran from a Mac with the action's script
 against the same device. Not tried: `ubuntu-24.04-arm` and `macos-15-intel` runners, `timeout`,
