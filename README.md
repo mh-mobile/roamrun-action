@@ -63,7 +63,7 @@ One device takes one install at a time: give jobs that install on it a
 | `bundle-id` | The app to launch. Without it, the app the `.ipa` holds is launched. |
 | `launch` | `false` to install only. Default `true`. |
 | `timeout` | With `relay`, the most seconds to wait for the install. By default, what the relay gives the upload and the install, and a minute more. |
-| `roamrunctl-version` | The roamrunctl release to use. Default `0.9.0`. With `relay`, the relay runs 0.9.0 or later too. |
+| `roamrunctl-version` | The roamrunctl release to use. Default `0.11.0`. With `relay`, the relay runs 0.9.0 or later too. |
 
 ## What it does
 
