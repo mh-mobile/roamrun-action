@@ -20,6 +20,8 @@ jobs:
           ./actionlint -color
       - name: Refused before anything is fetched
         run: scripts/check-refusals.sh
+      - name: With ota-server, one roamrunctl ota and nothing else
+        run: scripts/check-ota.sh
       - name: Through the action, a refusal fails the step
         id: refused
         continue-on-error: true

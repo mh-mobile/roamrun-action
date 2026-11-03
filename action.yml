@@ -1,5 +1,5 @@
-name: RoamRun install and launch
-description: Install an .ipa on a paired iPhone or iPad over Tailscale and launch it, with roamrunctl
+name: RoamRun install and launch, or publish to the OTA page
+description: Install an .ipa on a paired iPhone or iPad over Tailscale and launch it, or put it on a Mac's OTA page, with roamrunctl
 author: mh-mobile
 branding:
   icon: smartphone
@@ -9,15 +9,24 @@ inputs:
   key:
     description: >-
       The device's pairing (a secret): a file `roamrun key create` wrote, or one `roamrunctl pair control`
-      saved. roamrunctl runs on this runner. Give this or `relay`.
+      saved. roamrunctl runs on this runner. Give this, `relay` or `ota-server`.
     required: false
   relay:
     description: >-
       The relay's address and port, as `roamrunctl mcp --http` printed them (100.x.y.z:9090): the relay
-      installs and launches. Give this or `key`.
+      installs and launches. Give this, `key` or `ota-server`.
     required: false
   token:
     description: With `relay`, the relay's token (a secret).
+    required: false
+  ota-server:
+    description: >-
+      The Mac's OTA server address and port, as `roamrun mcp --http --allow-ota` printed them
+      (100.x.y.z:9091): the .ipa goes on that Mac's OTA page, and no device is installed on. Give this,
+      `key` or `relay`.
+    required: false
+  ota-server-token:
+    description: With `ota-server`, the OTA server's token (a secret).
     required: false
   device:
     description: >-
@@ -25,22 +34,31 @@ inputs:
       on this runner (default `device`).
     required: false
   ipa:
-    description: The .ipa to install. Without it, only `bundle-id` is launched.
+    description: The .ipa to install (with `ota-server`, to publish; required). Without it, only `bundle-id` is launched.
     required: false
   bundle-id:
     description: The app to launch. Without it, the app the .ipa holds is launched (unless `launch` is false).
     required: false
   launch:
-    description: Launch after installing.
+    description: Launch after installing. Ignored with `ota-server`.
     required: false
     default: "true"
+  replace:
+    description: >-
+      With `ota-server`, drop the builds the page already lists under the same version and build number
+      (`roamrunctl ota --replace`).
+    required: false
+    default: "false"
   timeout:
-    description: With `relay`, the most seconds to wait for the install (default, what the relay gives it).
+    description: >-
+      With `relay`, the most seconds to wait for the install (default, what the relay gives it). With
+      `ota-server`, the most seconds to wait on the OTA server for the whole publish, the upload included
+      (default, roamrunctl's).
     required: false
   roamrunctl-version:
-    description: The roamrunctl release to use.
+    description: The roamrunctl release to use (with `ota-server`, 0.12.0 or later).
     required: false
-    default: "0.11.0"
+    default: "0.12.0"
 
 runs:
   using: composite
@@ -49,11 +67,14 @@ runs:
       env:
         RR_KEY: ${{ inputs.key }}
         RR_RELAY: ${{ inputs.relay }}
-        ROAMRUNCTL_TOKEN: ${{ inputs.token }}
+        RR_TOKEN: ${{ inputs.token }}
+        RR_OTA_SERVER: ${{ inputs.ota-server }}
+        RR_OTA_TOKEN: ${{ inputs.ota-server-token }}
         RR_DEVICE: ${{ inputs.device }}
         RR_IPA: ${{ inputs.ipa }}
         RR_BUNDLE: ${{ inputs.bundle-id }}
         RR_LAUNCH: ${{ inputs.launch }}
+        RR_REPLACE: ${{ inputs.replace }}
         RR_TIMEOUT: ${{ inputs.timeout }}
         RR_VERSION: ${{ inputs.roamrunctl-version }}
       run: '"$GITHUB_ACTION_PATH/scripts/run.sh"'
