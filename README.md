@@ -174,7 +174,20 @@ auth key on a tailnet with Tailnet Lock:
 
 `launch: false`, and the three ways of `ipa` / `bundle-id`, ran from a Mac with the action's script
 against the same device. Not tried: `ubuntu-24.04-arm` and `macos-15-intel` runners, `timeout`,
-self-hosted runners, an iPad, a larger `.ipa`. `ota-server` hasn't been run with the action yet.
+self-hosted runners, an iPad, a larger `.ipa`.
+
+On 2026-11-03 (UTC), with this action at e3e6551 (its default roamrunctl 0.12.0; v1.2.0 adds only
+this paragraph), the runner joined with a signed auth key on a tailnet with Tailnet Lock:
+
+| Runner | Way | Result |
+|---|---|---|
+| `ubuntu-24.04` | `relay` (a MacBook Pro, roamrunctl 0.12.0), on an iPhone Duo | installed (5 s) and launched |
+| `ubuntu-24.04` | `relay` (the same MacBook Pro, roamrunctl 0.11.1), on the iPhone Duo | installed (6 s) and launched |
+| `ubuntu-24.04` | `ota-server` (the same MacBook Pro, RoamRun 0.12.0's `roamrun mcp --http --allow-ota`), a 1 MB Ad Hoc `.ipa`, `replace: true` | stored; the page, fetched from the runner, listed it |
+
+For the `ota-server` run the build was first taken off the page (its folder deleted on the Mac), so
+that the page listing it showed this run's build. `key` wasn't run with 0.12.0, nor `ota-server`
+on `macos-15`.
 
 ## License
 
