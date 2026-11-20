@@ -58,7 +58,7 @@ inputs:
   roamrunctl-version:
     description: The roamrunctl release to use (with `ota-server`, 0.12.0 or later).
     required: false
-    default: "0.12.0"
+    default: "0.13.0"
 
 runs:
   using: composite
