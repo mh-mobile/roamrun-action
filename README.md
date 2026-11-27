@@ -102,7 +102,7 @@ has the rest.
 | `launch` | `false` to install only. Default `true`. Ignored with `ota-server`. |
 | `replace` | With `ota-server`, `true` drops the builds the page already lists under the same version and build number (`roamrunctl ota --replace`). Default `false`. |
 | `timeout` | With `relay`, the most seconds to wait for the install. By default, what the relay gives the upload and the install, and a minute more. With `ota-server`, the most seconds to wait on the OTA server, the upload included; by default, roamrunctl's. |
-| `roamrunctl-version` | The roamrunctl release to use. Default `0.13.0`. With `relay`, the relay runs 0.10.0 or later. With `ota-server`, 0.12.0 or later. |
+| `roamrunctl-version` | The roamrunctl release to use. Default `0.14.0`. With `relay`, the relay runs 0.10.0 or later. With `ota-server`, 0.12.0 or later. |
 
 ## What it does
 
